@@ -5,6 +5,7 @@ The account views are here.
 import time
 import logging
 import random
+import urllib
 
 from django.views import generic
 
@@ -166,49 +167,53 @@ passwordmodify = PasswordModify.as_view()
 
 
 class PhoneModify(generic.FormView):
-
+    
     form_class = forms.PhoneModifyForm
     template_name = 'portal/phone_modify.html'
-
     def form_valid(self, form):
         user = utils.get_user_obj(self.request)
         data = form.cleaned_data
-        print user.verifycode
-        if user and data['phone'] and \
-           data['verification_code'] == str(user.verifycode):
-            user.phone = data['phone']
+        if user and data['verification_code'] == str(user.verifycode):
+            user.phone = data['newphone']
+            user.is_active = False
             user.save()
-            return safe(self.request)
+            return info(self.request)
         else:
-        #LOG.debug("%s phone modify failed." % user)
+            user.is_active = False
+            user.save()
             return utils.render('phone_modify.html',
-                                {'errors': 'phone number is wrong',
-                                 'form': form})
+                               {'errors': 'verifycode is wrong!',
+                                'form': form})
 
-phonemodify = PhoneModify.as_view()
+phonemodify = require_auth(PhoneModify.as_view()) 
 
 
 class SendVerifyCode(generic.FormView):
-
+    
     form_class = forms.SendVerifyCodeForm
     template_name = 'portal/send_verifycode.html'
 
     def form_valid(self, form):
         user = utils.get_user_obj(self.request)
         data = form.cleaned_data
-        if user and data['phone']:
-            user.verifycode = random.randrange(0, 999999)
-            user.save()
-            content = 'verifycode:' + str(user.verifycode)
-            utils.send_msg(data['phone'], content)
-            return phonemodify(self.request)
-        else:
-        #LOG.debug("%s phone modify failed." % user)
-            return utils.render('send_verifycode.html',
+        if user and data['newphone']:
+            if user.is_active == False:
+                user.verifycode = random.randrange(0, 999999)
+                user.is_active = True               
+                user.save()
+                print user.verifycode
+                content = 'verifycode:' + str(user.verifycode)
+                utils.send_msg(data['phone'], content)
+                return phonemodify(self.request)
+            else:
+                return phonemodify(self.request)
+        else:           
+            return utils.render('phone_modify.html',
                                 {'errors': 'failed',
                                  'form': form})
 
-sendverifycode = SendVerifyCode.as_view()
+
+sendverifycode = require_auth(SendVerifyCode.as_view())
 
 
 class MailboxModify(generic.FormView):
@@ -220,13 +225,21 @@ class MailboxModify(generic.FormView):
         user = utils.get_user_obj(self.request)
         data = form.cleaned_data
         if user and data['email']:
+            para = user.username
             content = 'click here to active ' + \
-                    '<a href="http://www.zufangbao.com/chargerent/">' \
+                    '<a href="http://localhost:8000/z/account/activate_mailbox/?username=' + \
+                    para + '">' + \
                     'http://www.active.com</a>'
-            utils.send_mail(data['email'], content)
-            user.email = data['email']
-            user.save()
-            return safe(self.request)
+            utils.send_mail(data['email'], content)    
+            for i in range(120):
+                time.sleep(1)
+                user = utils.get_user_obj(self.request)
+                if user.is_active == True: 
+                    user.email = data['email']
+                    user.is_active = False
+                    user.save()
+                    break
+            return info(self.request)
         else:
         #LOG.debug("%s mailbox modify failed." % user)
             return utils.render('mailbox_modify.html',
@@ -273,3 +286,11 @@ def messages(request):
 @require_auth
 def payments(request):
     pass
+
+@require_auth
+def activatemailbox(request):
+    user = utils.get_user_obj(request)
+    user.is_active = True
+    user.save()
+    print 'activate have been worked'
+    return utils.render('activate_mailbox.html', {})

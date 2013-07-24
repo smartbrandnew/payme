@@ -109,11 +109,11 @@ class PasswordModifyForm(forms.Form):
 
 
 class PhoneModifyForm(forms.Form):
-    phone = forms.CharField()
+    newphone = forms.CharField()
     verification_code = forms.CharField()
 
 class SendVerifyCodeForm(forms.Form):
-    phone = forms.CharField()
+    newphone = forms.CharField()
 
 
 class MailboxBindingForm(forms.Form):

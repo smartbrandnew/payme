@@ -3,6 +3,7 @@
 
 {% block content %}
 
+    
 <div class="container">
   <div class="row">
     <div class="span2 graybox" id="sidebar">
@@ -32,30 +33,10 @@
       </ul>
     </div>
 
-    <div class="span10" id="content">
-      <div class="graybox">
-        <div class="graybox-inner">
-          <h3>Personal Information</h3>
-          <table cellspacing="0" class="table table-striped">
-	    
-	    <br>用户名：{{ username }}  
-	    <a href="{% url 'account_vip' %}">升级VIP    </a>
-	    <a href="{% url 'account_vip_confirm' %}">VIP特权    </a>
-	    <a href="#">显示头像    </a><p>&nbsp;&nbsp</p>
-	  
-	
-	    </br>
-	    <br>真实姓名：{{ real_name }}
-	    <a href="{% url 'name_certificate' %}">实名认证</a>
-	    </br>
-	    <br>电话：{{ phone }}</br>
-	    <br>身份证号：{{ real_id }}</br>
-	    <br>Email邮箱：{{ email }}</br>
-          </table>
-        </div>
-      </div>
-    </div>
-  </div> <!-- graybox -->
+    <div class="container">
+  <div class="formbox">
+   activation Succeed!!
+  </div> <!-- formbox -->
 </div> <!-- container -->
 
 {% endblock %}

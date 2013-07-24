@@ -66,6 +66,7 @@ class User(Model, BaseModel):
     problem_three = CharField(max_length=255)
     verifycode = CharField(max_length=255)
     is_vip = BooleanField(_('is vip'))
+    is_active = BooleanField(default=False)
 
     created_at = DateTimeField(_('created at'), auto_now_add=True)
 
