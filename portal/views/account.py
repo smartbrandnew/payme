@@ -203,7 +203,7 @@ class SendVerifyCode(generic.FormView):
                 user.save()
                 print user.verifycode
                 content = 'verifycode:' + str(user.verifycode)
-                utils.send_msg(data['phone'], content)
+                utils.send_msg(data['newphone'], content)
                 return phonemodify(self.request)
             else:
                 return phonemodify(self.request)
